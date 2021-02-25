@@ -1,5 +1,6 @@
 import React from "react";
 import { useAjax } from "../src";
+import { UseFetchOptions } from "../src/types";
 import "@testing-library/jest-dom";
 import { waitFor } from "@testing-library/react";
 
@@ -25,125 +26,154 @@ jest.mock("axios", () => ({
   },
 }));
 
-const handleSuccess = jest.fn();
-const handleError = jest.fn();
-
-const TestComponent = () => {
+const BasicFetch = (props: UseFetchOptions<string[]> = {}) => {
   const [
     fetch,
-    { calls, successCalls, loading, data, clearSuccessCalls, clearCalls },
-  ] = useAjax<string[]>({
-    url: URL,
-    initial: [],
-    onSuccess: handleSuccess,
-  });
-
-  const [fetchImmediately, { calls: immediateFetches }] = useAjax<string[]>({
-    url: URL,
-    fetchImmediately: true,
-  });
-
-  const [update, { data: updated }] = useAjax<string>({
-    url: URL,
-    method: PATCH,
-    initial: "start",
-  });
-  const [updateWithFunc, { data: updatedWithFunc }] = useAjax<string>({
-    url: URL,
-    method: PATCH,
-    initial: "start",
-  });
-  const [error, { errorCalls, clearErrorCalls }] = useAjax({
-    url: ERROR_URL,
-    onError: handleError,
-  });
+    {
+      calls,
+      errorCalls,
+      successCalls,
+      loading,
+      data,
+      clearSuccessCalls,
+      clearCalls,
+      clearErrorCalls,
+    },
+  ] = useAjax({ url: URL, initial: [], ...props });
 
   return (
     <div>
       <button onClick={() => fetch()}>Fetch</button>
-      <button onClick={clearSuccessCalls}>Clear fetch success calls</button>
-      <button onClick={clearErrorCalls}>Clear error calls</button>
-      <button onClick={clearCalls}>Clear fetch calls</button>
-      <button onClick={() => error()}>Cause error</button>
-      <button onClick={() => update({ data: "next" })}>Update</button>
-      <button onClick={() => updateWithFunc(() => ({ data: "with func" }))}>
-        With func
+      <button onClick={() => fetch({ data: ["Bond", "James Bond"] })}>
+        Fetch with override object
+      </button>
+      <button onClick={() => fetch(() => ({ data: ["Bond", "James Bond"] }))}>
+        Fetch with override function
       </button>
       {loading && <p>Loading...</p>}
-      {!!data.length && <p data-testid="listResp">{data.join(", ")}</p>}
+      {!!data.length && <p data-testid="data">{data.join(", ")}</p>}
       <p data-testid="calls">{calls}</p>
-      <p data-testid="immediateFetches">{immediateFetches}</p>
       <p data-testid="successCalls">{successCalls}</p>
       <p data-testid="errorCalls">{errorCalls}</p>
-      <p data-testid="updated">{updated}</p>
-      <p data-testid="updatedWithFunc">{updatedWithFunc}</p>
+      <button onClick={clearErrorCalls}>Clear error calls</button>
+      <button onClick={clearSuccessCalls}>Clear success calls</button>
+      <button onClick={clearCalls}>Clear calls</button>
     </div>
   );
 };
 
 describe("useAjax", () => {
-  test("fetches with returned handler, incrementing calls and showing loading", async () => {
-    // Render and check initial state
-    const { queryByTestId, queryByText } = render(<TestComponent />);
-    expect(queryByTestId("calls").textContent).toBe("0");
-    expect(queryByTestId("successCalls").textContent).toBe("0");
-    expect(queryByTestId("errorCalls").textContent).toBe("0");
-    // Call fetch and error endpoints
-    fireEvent.click(queryByText("Fetch"));
-    fireEvent.click(queryByText("Cause error"));
-    expect(queryByText("Loading...")).toBeInTheDocument();
-    // Wait for changes in the UI
-    await waitFor(() => {
-      expect(queryByText("Loading...")).not.toBeInTheDocument();
-      expect(queryByTestId("listResp").textContent).toEqual("some, values");
-      expect(queryByTestId("calls").textContent).toBe("1");
-      expect(queryByTestId("errorCalls").textContent).toBe("1");
-      expect(queryByTestId("successCalls").textContent).toBe("1");
-      expect(queryByTestId("immediateFetches").textContent).toBe("1");
-    });
-    // Check handlers called
-    expect(handleSuccess).toHaveBeenCalledTimes(1);
-    expect(handleError).toHaveBeenCalledTimes(1);
-    expect(handleSuccess).toHaveBeenCalledWith({ data: ["some", "values"] });
-    expect(handleError).toHaveBeenCalledWith({ error: "some error" });
-  });
-  test("handler works with overrides", async () => {
-    const { queryByTestId, queryByText } = render(<TestComponent />);
-    expect(queryByTestId("updated").textContent).toEqual("start");
-    fireEvent.click(queryByText("Update"));
-    await waitFor(() => {
-      expect(queryByTestId("updated").textContent).toEqual("next");
-    });
-  });
-  test("handler works with overrides as func", async () => {
-    const { queryByTestId, queryByText } = render(<TestComponent />);
-    expect(queryByTestId("updatedWithFunc").textContent).toEqual("start");
-    fireEvent.click(queryByText("With func"));
-    await waitFor(() => {
-      expect(queryByTestId("updatedWithFunc").textContent).toEqual("with func");
-    });
-  });
-  test("clears calls", async () => {
-    const { queryByTestId, queryByText } = render(<TestComponent />);
+  test("fetches, increments calls and shows loading", async () => {
+    const onSuccess = jest.fn();
+
+    const { queryByTestId, queryByText } = render(
+      <BasicFetch onSuccess={onSuccess} />
+    );
     expect(queryByTestId("calls").textContent).toBe("0");
     expect(queryByTestId("successCalls").textContent).toBe("0");
     expect(queryByTestId("errorCalls").textContent).toBe("0");
     fireEvent.click(queryByText("Fetch"));
-    fireEvent.click(queryByText("Cause error"));
     expect(queryByText("Loading...")).toBeInTheDocument();
     await waitFor(() => {
       expect(queryByText("Loading...")).not.toBeInTheDocument();
-      expect(queryByTestId("listResp").textContent).toEqual("some, values");
+      expect(queryByTestId("data").textContent).toBe("some, values");
       expect(queryByTestId("calls").textContent).toBe("1");
-      expect(queryByTestId("errorCalls").textContent).toBe("1");
+      expect(queryByTestId("errorCalls").textContent).toBe("0");
       expect(queryByTestId("successCalls").textContent).toBe("1");
     });
-    // Invoke clear handlers
-    fireEvent.click(queryByText("Clear fetch calls"));
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledWith({ data: ["some", "values"] });
+  });
+  test("can fetch immediately", async () => {
+    const onSuccess = jest.fn();
+
+    const { queryByTestId, queryByText } = render(
+      <BasicFetch fetchImmediately onSuccess={onSuccess} />
+    );
+    expect(queryByTestId("calls").textContent).toBe("1");
+    expect(queryByTestId("successCalls").textContent).toBe("0");
+    expect(queryByTestId("errorCalls").textContent).toBe("0");
+    await waitFor(() => {
+      expect(queryByText("Loading...")).not.toBeInTheDocument();
+      expect(queryByTestId("data").textContent).toBe("some, values");
+      expect(queryByTestId("calls").textContent).toBe("1");
+      expect(queryByTestId("errorCalls").textContent).toBe("0");
+      expect(queryByTestId("successCalls").textContent).toBe("1");
+    });
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledWith({ data: ["some", "values"] });
+  });
+  test("handles errors", async () => {
+    const onError = jest.fn();
+
+    const { queryByTestId, queryByText } = render(
+      <BasicFetch url={ERROR_URL} onError={onError} />
+    );
+    expect(queryByTestId("calls").textContent).toBe("0");
+    expect(queryByTestId("successCalls").textContent).toBe("0");
+    expect(queryByTestId("errorCalls").textContent).toBe("0");
+    fireEvent.click(queryByText("Fetch"));
+    expect(queryByText("Loading...")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(queryByText("Loading...")).not.toBeInTheDocument();
+      expect(queryByTestId("data")).not.toBeInTheDocument();
+      expect(queryByTestId("calls").textContent).toBe("1");
+      expect(queryByTestId("errorCalls").textContent).toBe("1");
+      expect(queryByTestId("successCalls").textContent).toBe("0");
+    });
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith({ error: "some error" });
+  });
+  test("handler works with override object", async () => {
+    const onSuccess = jest.fn();
+
+    const { queryByTestId, queryByText } = render(
+      <BasicFetch onSuccess={onSuccess} method={PATCH} />
+    );
+    fireEvent.click(queryByText("Fetch with override object"));
+    await waitFor(() => {
+      expect(queryByTestId("data").textContent).toBe("Bond, James Bond");
+    });
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledWith({ data: ["Bond", "James Bond"] });
+  });
+  test("handler works with override function", async () => {
+    const onSuccess = jest.fn();
+
+    const { queryByTestId, queryByText } = render(
+      <BasicFetch onSuccess={onSuccess} method={PATCH} />
+    );
+    fireEvent.click(queryByText("Fetch with override function"));
+    await waitFor(() => {
+      expect(queryByTestId("data").textContent).toBe("Bond, James Bond");
+    });
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(onSuccess).toHaveBeenCalledWith({ data: ["Bond", "James Bond"] });
+  });
+  test("clears success calls", async () => {
+    const { queryByTestId, queryByText } = render(<BasicFetch />);
+    fireEvent.click(queryByText("Fetch"));
+    await waitFor(() => {
+      expect(queryByTestId("calls").textContent).toBe("1");
+      expect(queryByTestId("successCalls").textContent).toBe("1");
+    });
+    fireEvent.click(queryByText("Clear calls"));
+    fireEvent.click(queryByText("Clear success calls"));
+    expect(queryByTestId("calls").textContent).toBe("0");
+    expect(queryByTestId("successCalls").textContent).toBe("0");
+  });
+  test("clears error calls", async () => {
+    const { queryByTestId, queryByText } = render(
+      <BasicFetch url={ERROR_URL} />
+    );
+    fireEvent.click(queryByText("Fetch"));
+    await waitFor(() => {
+      expect(queryByTestId("calls").textContent).toBe("1");
+      expect(queryByTestId("errorCalls").textContent).toBe("1");
+    });
+    fireEvent.click(queryByText("Clear calls"));
     fireEvent.click(queryByText("Clear error calls"));
-    fireEvent.click(queryByText("Clear fetch success calls"));
     expect(queryByTestId("calls").textContent).toBe("0");
-    expect(queryByTestId("successCalls").textContent).toBe("0");
     expect(queryByTestId("errorCalls").textContent).toBe("0");
   });
 });
