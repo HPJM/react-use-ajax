@@ -4,9 +4,9 @@ This is a hook to make Ajax requests, which helps reduce boilerplate in your cod
 
 ## Usage
 
-The hook is configured with an options object. This is an extension of the default `axios` request config with some optional success / error handlers. See the reference below.
+The hook is configured with an options object. This is an extension of the default `axios` request config with extra options. See the reference below.
 
-The hook returns a tuple comprising a function, and an object with some useful properties. The function makes the actual request, and takes an optional `override` argument. The argument can be an object, which is merged in with the initial config, or a function, which is passed the initial config as an argument. The return value of the override function is by default merged in with the initial config. If you do not wish either form to be merged with the initial config, pass `false` as the second argument to the function.
+The hook returns a tuple comprising a function, and an object with some useful properties and metadata. The function makes the actual request, and takes an optional `override` argument. The argument can be an object, which is merged in with the initial config, or a function, which is passed the initial config as an argument. The return value of the override function is by default merged in with the initial config. If you do not wish either form to be merged with the initial config, pass `false` as the second argument to the function.
 
 ```jsx
 import { useAjax } from "react-use-ajax";
@@ -16,7 +16,7 @@ const YourComponent = () => {
     fetch,
     { data, loading, fetched, clearSuccess, success, successMessage },
   ] = useAjax({
-    url: "localhost:9000",
+    url: "localhost:9000/users",
     initial: [],
     onSuccess: () => "Successfully fetched!",
     fetchImmediately: true,
@@ -33,9 +33,11 @@ const YourComponent = () => {
 
   return (
     <div>
-      <button onClick={() => fetch()}>Fetch!</button>
+      <button onClick={() => fetch({ data: "extra options here" })}>
+        Fetch!
+      </button>
       <button onClick={() => probablyAnError()}>Error!</button>
-      {data.slice(0, 5).map((todo) => (todo as any).id)}
+      <p>Data: {data.slice(0, 5).map((person) => person.name)}</p>
       {loading && <p>Loading...</p>}
       {fetched && <p>Fetched</p>}
       {success && <p>Success!</p>}
@@ -66,8 +68,8 @@ const options = {
 - `fetchImmediately?: boolean` - this fetches on render, defaults to false
 - `errorMessage?: string` - message to show when request fails
 - `successMessage?: string` - message to show when request succeeds
-- `errorTimeout?: string` - Times out error states
-- `successTimeout?: string` - Times out success states
+- `errorTimeout?: string` - times out error states
+- `successTimeout?: string` - times out success states
 
 ```js
 const [handler, { calls, successCalls, errorCalls, loading, data }] = useAjax(
