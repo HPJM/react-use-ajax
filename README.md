@@ -66,6 +66,7 @@ const [handler, { calls, successCalls, errorCalls, loading, data }] = useAjax(
 - `successCalls: number` - count of successful requests;
 - `errorCalls: number` - count of failed requests;
 - `loading: boolean` - whether response is being waited for;
+- `fetched: boolean` - whether request has been made at all;
 - `data: void` - the data from the response;
 - `clearSuccessCalls: () => void` - clear success calls;
 - `clearErrorCalls: () => void` - clear error calls;

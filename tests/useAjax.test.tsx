@@ -38,6 +38,7 @@ const BasicFetch = (props: UseFetchOptions<string[]> = {}) => {
       clearSuccessCalls,
       clearCalls,
       clearErrorCalls,
+      fetched,
     },
   ] = useAjax({ url: URL, initial: [], ...props });
 
@@ -58,6 +59,7 @@ const BasicFetch = (props: UseFetchOptions<string[]> = {}) => {
       <button onClick={clearErrorCalls}>Clear error calls</button>
       <button onClick={clearSuccessCalls}>Clear success calls</button>
       <button onClick={clearCalls}>Clear calls</button>
+      {fetched && <p>Fetched</p>}
     </div>
   );
 };
@@ -69,12 +71,14 @@ describe("useAjax", () => {
     const { queryByTestId, queryByText } = render(
       <BasicFetch onSuccess={onSuccess} />
     );
+    expect(queryByText("Fetched")).not.toBeInTheDocument();
     expect(queryByTestId("calls").textContent).toBe("0");
     expect(queryByTestId("successCalls").textContent).toBe("0");
     expect(queryByTestId("errorCalls").textContent).toBe("0");
     fireEvent.click(queryByText("Fetch"));
     expect(queryByText("Loading...")).toBeInTheDocument();
     await waitFor(() => {
+      expect(queryByText("Fetched")).toBeInTheDocument();
       expect(queryByText("Loading...")).not.toBeInTheDocument();
       expect(queryByTestId("data").textContent).toBe("some, values");
       expect(queryByTestId("calls").textContent).toBe("1");

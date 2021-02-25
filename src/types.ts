@@ -22,6 +22,7 @@ interface UseFetchExtra<T> {
   successCalls: number;
   errorCalls: number;
   loading: boolean;
+  fetched: boolean;
   data: T;
   clearSuccessCalls: () => void;
   clearErrorCalls: () => void;

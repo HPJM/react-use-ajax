@@ -72,6 +72,7 @@ export const useAjax = <T>({
   return [
     handler,
     {
+      fetched,
       calls,
       errorCalls,
       successCalls,
