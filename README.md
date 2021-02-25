@@ -53,6 +53,7 @@ const options = {
 - `onSuccess()?: void` - optional callback invoked when response made successfully;
 - `onError()?: void` - optional callback invoked when response errors;
 - `initial?: T` - this defaults to `null` but useful for setting an initial value before the first fetch is done;
+- `fetchImmediately?: boolean` - this fetches on render, defaults to false;
 
 ```js
 const [handler, { calls, successCalls, errorCalls, loading, data }] = useAjax(
@@ -66,3 +67,6 @@ const [handler, { calls, successCalls, errorCalls, loading, data }] = useAjax(
 - `errorCalls: number` - count of failed requests;
 - `loading: boolean` - whether response is being waited for;
 - `data: void` - the data from the response;
+- `clearSuccessCalls: () => void` - clear success calls;
+- `clearErrorCalls: () => void` - clear error calls;
+- `clearCalls: () => void` - clear calls;
