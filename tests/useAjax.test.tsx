@@ -7,15 +7,19 @@ import { render, fireEvent } from "@testing-library/react";
 
 const responseData = ["some", "values"];
 
+const URL = "localhost:3000";
+const ERROR_URL = "localhost:3000/error";
+const PATCH = "PATCH";
+
 jest.mock("axios", () => ({
   request: ({ url, method, data }) => {
-    if (url === "localhost:3000") {
-      if (method === "PATCH") {
+    if (url === URL) {
+      if (method === PATCH) {
         return Promise.resolve({ data });
       }
       return Promise.resolve({ data: responseData });
     }
-    if (url === "localhost:3000/error") {
+    if (url === ERROR_URL) {
       return Promise.reject({ error: "some error" });
     }
   },
@@ -26,31 +30,32 @@ const handleError = jest.fn();
 
 const TestComponent = () => {
   const [
-    getAll,
+    fetch,
     { calls, successCalls, loading, data, clearSuccessCalls, clearCalls },
   ] = useAjax<string[]>({
-    url: "localhost:3000",
+    url: URL,
     defaultDataValue: [],
     onSuccess: handleSuccess,
   });
+
   const [update, { data: updated }] = useAjax<string>({
-    url: "localhost:3000",
-    method: "PATCH",
+    url: URL,
+    method: PATCH,
     defaultDataValue: "start",
   });
   const [updateWithFunc, { data: updatedWithFunc }] = useAjax<string>({
-    url: "localhost:3000",
-    method: "PATCH",
+    url: URL,
+    method: PATCH,
     defaultDataValue: "start",
   });
   const [error, { errorCalls, clearErrorCalls }] = useAjax({
-    url: "localhost:3000/error",
+    url: ERROR_URL,
     onError: handleError,
   });
 
   return (
     <div>
-      <button onClick={() => getAll()}>Fetch stuff!</button>
+      <button onClick={() => fetch()}>Fetch</button>
       <button onClick={clearSuccessCalls}>Clear fetch success calls</button>
       <button onClick={clearErrorCalls}>Clear error calls</button>
       <button onClick={clearCalls}>Clear fetch calls</button>
@@ -72,13 +77,16 @@ const TestComponent = () => {
 
 describe("useAjax", () => {
   test("fetches with returned handler, incrementing calls and showing loading", async () => {
+    // Render and check initial state
     const { queryByTestId, queryByText } = render(<TestComponent />);
     expect(queryByTestId("calls").textContent).toBe("0");
     expect(queryByTestId("successCalls").textContent).toBe("0");
     expect(queryByTestId("errorCalls").textContent).toBe("0");
-    fireEvent.click(queryByText("Fetch stuff!"));
+    // Call fetch and error endpoints
+    fireEvent.click(queryByText("Fetch"));
     fireEvent.click(queryByText("Cause error"));
     expect(queryByText("Loading...")).toBeInTheDocument();
+    // Wait for changes in the UI
     await waitFor(() => {
       expect(queryByText("Loading...")).not.toBeInTheDocument();
       expect(queryByTestId("listResp").textContent).toEqual("some, values");
@@ -86,6 +94,7 @@ describe("useAjax", () => {
       expect(queryByTestId("errorCalls").textContent).toBe("1");
       expect(queryByTestId("successCalls").textContent).toBe("1");
     });
+    // Check handlers called
     expect(handleSuccess).toHaveBeenCalledTimes(1);
     expect(handleError).toHaveBeenCalledTimes(1);
     expect(handleSuccess).toHaveBeenCalledWith({ data: ["some", "values"] });
@@ -112,7 +121,7 @@ describe("useAjax", () => {
     expect(queryByTestId("calls").textContent).toBe("0");
     expect(queryByTestId("successCalls").textContent).toBe("0");
     expect(queryByTestId("errorCalls").textContent).toBe("0");
-    fireEvent.click(queryByText("Fetch stuff!"));
+    fireEvent.click(queryByText("Fetch"));
     fireEvent.click(queryByText("Cause error"));
     expect(queryByText("Loading...")).toBeInTheDocument();
     await waitFor(() => {
@@ -122,6 +131,7 @@ describe("useAjax", () => {
       expect(queryByTestId("errorCalls").textContent).toBe("1");
       expect(queryByTestId("successCalls").textContent).toBe("1");
     });
+    // Invoke clear handlers
     fireEvent.click(queryByText("Clear fetch calls"));
     fireEvent.click(queryByText("Clear error calls"));
     fireEvent.click(queryByText("Clear fetch success calls"));
