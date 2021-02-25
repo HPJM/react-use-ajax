@@ -77,3 +77,5 @@ const [handler, { calls, successCalls, errorCalls, loading, data }] = useAjax(
 - `clearSuccessCalls: () => void` - clear success calls;
 - `clearErrorCalls: () => void` - clear error calls;
 - `clearCalls: () => void` - clear calls;
+- `clearError: () => void` - clears error states;
+- `clearSuccess: () => void` - clears success states;

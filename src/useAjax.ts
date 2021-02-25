@@ -109,6 +109,14 @@ export const useAjax = <T>({
       success,
       errorMessage,
       successMessage,
+      clearError: () => {
+        setError(false);
+        setErrorMessage("");
+      },
+      clearSuccess: () => {
+        setSuccess(false);
+        setSuccessMessage("");
+      },
     },
   ];
 };

@@ -43,6 +43,8 @@ const BasicFetch = (props: UseFetchOptions<string[]> = {}) => {
       error,
       successMessage,
       errorMessage,
+      clearError,
+      clearSuccess,
     },
   ] = useAjax({ url: URL, initial: [], ...props });
 
@@ -68,6 +70,8 @@ const BasicFetch = (props: UseFetchOptions<string[]> = {}) => {
       {error && <p>Error</p>}
       {successMessage && <p>{successMessage}</p>}
       {errorMessage && <p>{errorMessage}</p>}
+      <button onClick={clearSuccess}>Clear success</button>
+      <button onClick={clearError}>Clear error</button>
     </div>
   );
 };
@@ -232,5 +236,29 @@ describe("useAjax", () => {
       expect(queryByText("Error")).toBeInTheDocument();
       expect(queryByText("Error!")).toBeInTheDocument();
     });
+  });
+  test("clears success", async () => {
+    const { queryByText } = render(<BasicFetch successMessage="Success!" />);
+    fireEvent.click(queryByText("Fetch"));
+    await waitFor(() => {
+      expect(queryByText("Success")).toBeInTheDocument();
+      expect(queryByText("Success!")).toBeInTheDocument();
+    });
+    fireEvent.click(queryByText("Clear success"));
+    expect(queryByText("Success")).not.toBeInTheDocument();
+    expect(queryByText("Success!")).not.toBeInTheDocument();
+  });
+  test("clears error", async () => {
+    const { queryByText } = render(
+      <BasicFetch errorMessage="Error!" url={ERROR_URL} />
+    );
+    fireEvent.click(queryByText("Fetch"));
+    await waitFor(() => {
+      expect(queryByText("Error")).toBeInTheDocument();
+      expect(queryByText("Error!")).toBeInTheDocument();
+    });
+    fireEvent.click(queryByText("Clear error"));
+    expect(queryByText("Error")).not.toBeInTheDocument();
+    expect(queryByText("Error!")).not.toBeInTheDocument();
   });
 });

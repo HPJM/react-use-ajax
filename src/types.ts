@@ -33,6 +33,8 @@ interface UseFetchExtra<T> {
   clearSuccessCalls: () => void;
   clearErrorCalls: () => void;
   clearCalls: () => void;
+  clearSuccess?: () => void;
+  clearError?: () => void;
 }
 
 export type UseFetch<T> = [UseFetchHandler<T>, UseFetchExtra<T>];
