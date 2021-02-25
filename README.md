@@ -46,7 +46,7 @@ const options = {
   onSuccess: (resp) => console.log("success:", resp.data),
   onError: (resp) => console.log("error:", resp),
   data: { key: "value" }
-  initial: {}
+  initial: []
 }
 ```
 
