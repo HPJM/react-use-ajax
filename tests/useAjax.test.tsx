@@ -252,4 +252,32 @@ describe("useAjax", () => {
     expect(queryByText("Error")).not.toBeInTheDocument();
     expect(queryByText("Error!")).not.toBeInTheDocument();
   });
+  test("times out success", async () => {
+    const { queryByText } = render(
+      <Fetch successMessage="Success!" successTimeout={500} />
+    );
+    fireEvent.click(queryByText("Fetch"));
+    await waitFor(() => {
+      expect(queryByText("Success")).toBeInTheDocument();
+      expect(queryByText("Success!")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(queryByText("Success")).not.toBeInTheDocument();
+      expect(queryByText("Success!")).not.toBeInTheDocument();
+    });
+  });
+  test("times out error", async () => {
+    const { queryByText } = render(
+      <ErrorFetch errorMessage="Error!" errorTimeout={500} />
+    );
+    fireEvent.click(queryByText("Fetch"));
+    await waitFor(() => {
+      expect(queryByText("Error")).toBeInTheDocument();
+      expect(queryByText("Error!")).toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(queryByText("Error")).not.toBeInTheDocument();
+      expect(queryByText("Error!")).not.toBeInTheDocument();
+    });
+  });
 });

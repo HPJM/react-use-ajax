@@ -8,6 +8,8 @@ export interface UseFetchOptions<T> extends AxiosRequestConfig {
   fetchImmediately?: boolean;
   successMessage?: string;
   errorMessage?: string;
+  successTimeout?: number;
+  errorTimeout?: number;
 }
 
 type OverrideFunc<T> = (

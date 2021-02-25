@@ -56,6 +56,8 @@ const options = {
 - `fetchImmediately?: boolean` - this fetches on render, defaults to false
 - `errorMessage?: string` - message to show when request fails
 - `successMessage?: string` - message to show when request succeeds
+- `errorTimeout?: string` - Times out error states
+- `successTimeout?: string` - Times out success states
 
 ```js
 const [handler, { calls, successCalls, errorCalls, loading, data }] = useAjax(

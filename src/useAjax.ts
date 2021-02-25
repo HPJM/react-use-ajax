@@ -26,6 +26,8 @@ export const useAjax = <T>({
   onError,
   initial,
   fetchImmediately = false,
+  successTimeout,
+  errorTimeout,
   ...opts
 }: UseFetchOptions<T>): UseFetch<T> => {
   const config: UseFetchOptions<T> = opts;
@@ -41,6 +43,16 @@ export const useAjax = <T>({
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [responseData, setResponseData] = useState<null | T>(initial || null);
 
+  const clearError = () => {
+    setError(false);
+    setErrorMessage("");
+  };
+
+  const clearSuccess = () => {
+    setSuccess(false);
+    setSuccessMessage("");
+  };
+
   const handleSuccess = (resp: AxiosResponse<T>) => {
     setSuccess(true);
     if (error) {
@@ -54,6 +66,9 @@ export const useAjax = <T>({
       }
     } else if (opts.successMessage) {
       setSuccessMessage(opts.successMessage);
+    }
+    if (Number.isFinite(successTimeout)) {
+      setTimeout(clearSuccess, successTimeout);
     }
     setResponseData(resp.data);
     setSuccessCalls(incCalls);
@@ -72,6 +87,9 @@ export const useAjax = <T>({
       }
     } else if (opts.errorMessage) {
       setErrorMessage(opts.errorMessage);
+    }
+    if (Number.isFinite(errorTimeout)) {
+      setTimeout(clearError, errorTimeout);
     }
     setErrorCalls(incCalls);
     setLoading(false);
@@ -109,14 +127,8 @@ export const useAjax = <T>({
       success,
       errorMessage,
       successMessage,
-      clearError: () => {
-        setError(false);
-        setErrorMessage("");
-      },
-      clearSuccess: () => {
-        setSuccess(false);
-        setSuccessMessage("");
-      },
+      clearError,
+      clearSuccess,
     },
   ];
 };
