@@ -21,7 +21,7 @@ export type Override<T> = UseFetchOptions<T> | OverrideFunc<T>;
 
 export type UseFetchHandler<T> = (override?: Override<T>) => void;
 
-interface UseFetchExtra<T> {
+interface UseFetchMetaAndActions<T> {
   calls: number;
   successCalls: number;
   errorCalls: number;
@@ -39,4 +39,4 @@ interface UseFetchExtra<T> {
   clearError?: () => void;
 }
 
-export type UseFetch<T> = [UseFetchHandler<T>, UseFetchExtra<T>];
+export type UseFetch<T> = [UseFetchHandler<T>, UseFetchMetaAndActions<T>];
