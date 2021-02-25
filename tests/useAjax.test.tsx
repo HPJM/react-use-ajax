@@ -26,7 +26,7 @@ jest.mock("axios", () => ({
   },
 }));
 
-const BasicFetch = (props: UseFetchOptions<string[]> = {}) => {
+const Fetch = (props: UseFetchOptions<string[]> = {}) => {
   const [
     fetch,
     {
@@ -76,12 +76,16 @@ const BasicFetch = (props: UseFetchOptions<string[]> = {}) => {
   );
 };
 
+const ErrorFetch = (props: UseFetchOptions<string[]> = {}) => (
+  <Fetch {...props} url={ERROR_URL} />
+);
+
 describe("useAjax", () => {
   test("fetches, increments calls and shows loading", async () => {
     const onSuccess = jest.fn();
 
     const { queryByTestId, queryByText } = render(
-      <BasicFetch onSuccess={onSuccess} />
+      <Fetch onSuccess={onSuccess} />
     );
     expect(queryByText("Fetched")).not.toBeInTheDocument();
     expect(queryByTestId("calls").textContent).toBe("0");
@@ -104,7 +108,7 @@ describe("useAjax", () => {
     const onSuccess = jest.fn();
 
     const { queryByTestId, queryByText } = render(
-      <BasicFetch fetchImmediately onSuccess={onSuccess} />
+      <Fetch fetchImmediately onSuccess={onSuccess} />
     );
     expect(queryByTestId("calls").textContent).toBe("1");
     expect(queryByTestId("successCalls").textContent).toBe("0");
@@ -123,7 +127,7 @@ describe("useAjax", () => {
     const onError = jest.fn();
 
     const { queryByTestId, queryByText } = render(
-      <BasicFetch url={ERROR_URL} onError={onError} />
+      <ErrorFetch onError={onError} />
     );
     expect(queryByTestId("calls").textContent).toBe("0");
     expect(queryByTestId("successCalls").textContent).toBe("0");
@@ -144,7 +148,7 @@ describe("useAjax", () => {
     const onSuccess = jest.fn();
 
     const { queryByTestId, queryByText } = render(
-      <BasicFetch onSuccess={onSuccess} method={PATCH} />
+      <Fetch onSuccess={onSuccess} method={PATCH} />
     );
     fireEvent.click(queryByText("Fetch with override object"));
     await waitFor(() => {
@@ -157,7 +161,7 @@ describe("useAjax", () => {
     const onSuccess = jest.fn();
 
     const { queryByTestId, queryByText } = render(
-      <BasicFetch onSuccess={onSuccess} method={PATCH} />
+      <Fetch onSuccess={onSuccess} method={PATCH} />
     );
     fireEvent.click(queryByText("Fetch with override function"));
     await waitFor(() => {
@@ -167,7 +171,7 @@ describe("useAjax", () => {
     expect(onSuccess).toHaveBeenCalledWith({ data: ["Bond", "James Bond"] });
   });
   test("clears success calls", async () => {
-    const { queryByTestId, queryByText } = render(<BasicFetch />);
+    const { queryByTestId, queryByText } = render(<Fetch />);
     fireEvent.click(queryByText("Fetch"));
     await waitFor(() => {
       expect(queryByTestId("calls").textContent).toBe("1");
@@ -179,9 +183,7 @@ describe("useAjax", () => {
     expect(queryByTestId("successCalls").textContent).toBe("0");
   });
   test("clears error calls", async () => {
-    const { queryByTestId, queryByText } = render(
-      <BasicFetch url={ERROR_URL} />
-    );
+    const { queryByTestId, queryByText } = render(<ErrorFetch />);
     fireEvent.click(queryByText("Fetch"));
     await waitFor(() => {
       expect(queryByTestId("calls").textContent).toBe("1");
@@ -193,7 +195,7 @@ describe("useAjax", () => {
     expect(queryByTestId("errorCalls").textContent).toBe("0");
   });
   test("shows success status after fetch from prop", async () => {
-    const { queryByText } = render(<BasicFetch successMessage="Success!" />);
+    const { queryByText } = render(<Fetch successMessage="Success!" />);
     fireEvent.click(queryByText("Fetch"));
     await waitFor(() => {
       expect(queryByText("Success")).toBeInTheDocument();
@@ -202,10 +204,7 @@ describe("useAjax", () => {
   });
   test("shows success status after fetch from function", async () => {
     const { queryByText } = render(
-      <BasicFetch
-        onSuccess={() => "Success!"}
-        successMessage="shouldn't run!"
-      />
+      <Fetch onSuccess={() => "Success!"} successMessage="shouldn't run!" />
     );
     fireEvent.click(queryByText("Fetch"));
     await waitFor(() => {
@@ -214,9 +213,7 @@ describe("useAjax", () => {
     });
   });
   test("shows error status after fetch from prop", async () => {
-    const { queryByText } = render(
-      <BasicFetch errorMessage="Error!" url={ERROR_URL} />
-    );
+    const { queryByText } = render(<ErrorFetch errorMessage="Error!" />);
     fireEvent.click(queryByText("Fetch"));
     await waitFor(() => {
       expect(queryByText("Error")).toBeInTheDocument();
@@ -225,11 +222,7 @@ describe("useAjax", () => {
   });
   test("shows error status after fetch from function", async () => {
     const { queryByText } = render(
-      <BasicFetch
-        onError={() => "Error!"}
-        errorMessage="shouldn't run!"
-        url={ERROR_URL}
-      />
+      <ErrorFetch onError={() => "Error!"} errorMessage="shouldn't run!" />
     );
     fireEvent.click(queryByText("Fetch"));
     await waitFor(() => {
@@ -238,7 +231,7 @@ describe("useAjax", () => {
     });
   });
   test("clears success", async () => {
-    const { queryByText } = render(<BasicFetch successMessage="Success!" />);
+    const { queryByText } = render(<Fetch successMessage="Success!" />);
     fireEvent.click(queryByText("Fetch"));
     await waitFor(() => {
       expect(queryByText("Success")).toBeInTheDocument();
@@ -249,9 +242,7 @@ describe("useAjax", () => {
     expect(queryByText("Success!")).not.toBeInTheDocument();
   });
   test("clears error", async () => {
-    const { queryByText } = render(
-      <BasicFetch errorMessage="Error!" url={ERROR_URL} />
-    );
+    const { queryByText } = render(<ErrorFetch errorMessage="Error!" />);
     fireEvent.click(queryByText("Fetch"));
     await waitFor(() => {
       expect(queryByText("Error")).toBeInTheDocument();
