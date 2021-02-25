@@ -24,7 +24,7 @@ const processOverride = <T>(
 export const useAjax = <T>({
   onSuccess,
   onError,
-  defaultDataValue,
+  initial,
   ...opts
 }: UseFetchOptions<T>): UseFetch<T> => {
   const config: UseFetchOptions<T> = opts;
@@ -34,9 +34,7 @@ export const useAjax = <T>({
   const [errorCalls, setErrorCalls] = useState<number>(0);
   const [fetched, setFetched] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [responseData, setResponseData] = useState<null | T>(
-    defaultDataValue || null
-  );
+  const [responseData, setResponseData] = useState<null | T>(initial || null);
 
   const handleSuccess = (resp: AxiosResponse<T>) => {
     if (onSuccess) {

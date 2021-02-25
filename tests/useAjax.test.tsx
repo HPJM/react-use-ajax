@@ -34,19 +34,19 @@ const TestComponent = () => {
     { calls, successCalls, loading, data, clearSuccessCalls, clearCalls },
   ] = useAjax<string[]>({
     url: URL,
-    defaultDataValue: [],
+    initial: [],
     onSuccess: handleSuccess,
   });
 
   const [update, { data: updated }] = useAjax<string>({
     url: URL,
     method: PATCH,
-    defaultDataValue: "start",
+    initial: "start",
   });
   const [updateWithFunc, { data: updatedWithFunc }] = useAjax<string>({
     url: URL,
     method: PATCH,
-    defaultDataValue: "start",
+    initial: "start",
   });
   const [error, { errorCalls, clearErrorCalls }] = useAjax({
     url: ERROR_URL,

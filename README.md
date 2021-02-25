@@ -12,7 +12,7 @@ The hook returns a tuple comprising a function, and an object with some useful p
 const YourComponent = () => {
   const [list, { calls, loading, data: things }] = useAjax({
     url: "localhost:3000/api/something",
-    defaultDataValue: [],
+    initial: [],
   });
 
   const [doSomeUpdate, { loading: updateLoading, data: updated }] = useAjax({
@@ -46,13 +46,13 @@ const options = {
   onSuccess: (resp) => console.log("success:", resp.data),
   onError: (resp) => console.log("error:", resp),
   data: { key: "value" }
-  defaultDataValue: {}
+  initial: {}
 }
 ```
 
 - `onSuccess()?: void` - optional callback invoked when response made successfully;
 - `onError()?: void` - optional callback invoked when response errors;
-- `defaultDataValue?: T` - this defaults to `null` but useful if you want a specific default whilst waiting for response, e.g. an empty array if you are expecting an array back;
+- `initial?: T` - this defaults to `null` but useful for setting an initial value before the first fetch is done;
 
 ```js
 const [handler, { calls, successCalls, errorCalls, loading, data }] = useAjax(

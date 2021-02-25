@@ -4,7 +4,7 @@ export interface UseFetchOptions<T> extends AxiosRequestConfig {
   onSuccess?: (data: AxiosResponse<T>) => void;
   onError?: (data: AxiosResponse<T>) => void;
   data?: T;
-  defaultDataValue?: T;
+  initial?: T;
 }
 
 type OverrideFunc<T> = (
