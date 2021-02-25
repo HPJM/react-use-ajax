@@ -5,6 +5,7 @@ export interface UseFetchOptions<T> extends AxiosRequestConfig {
   onError?: (data: AxiosResponse<T>) => void;
   data?: T;
   initial?: T;
+  fetchImmediately?: boolean;
 }
 
 type OverrideFunc<T> = (

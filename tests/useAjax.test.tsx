@@ -38,6 +38,11 @@ const TestComponent = () => {
     onSuccess: handleSuccess,
   });
 
+  const [fetchImmediately, { calls: immediateFetches }] = useAjax<string[]>({
+    url: URL,
+    fetchImmediately: true,
+  });
+
   const [update, { data: updated }] = useAjax<string>({
     url: URL,
     method: PATCH,
@@ -67,6 +72,7 @@ const TestComponent = () => {
       {loading && <p>Loading...</p>}
       {!!data.length && <p data-testid="listResp">{data.join(", ")}</p>}
       <p data-testid="calls">{calls}</p>
+      <p data-testid="immediateFetches">{immediateFetches}</p>
       <p data-testid="successCalls">{successCalls}</p>
       <p data-testid="errorCalls">{errorCalls}</p>
       <p data-testid="updated">{updated}</p>
@@ -93,6 +99,7 @@ describe("useAjax", () => {
       expect(queryByTestId("calls").textContent).toBe("1");
       expect(queryByTestId("errorCalls").textContent).toBe("1");
       expect(queryByTestId("successCalls").textContent).toBe("1");
+      expect(queryByTestId("immediateFetches").textContent).toBe("1");
     });
     // Check handlers called
     expect(handleSuccess).toHaveBeenCalledTimes(1);

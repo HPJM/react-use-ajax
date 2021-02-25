@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import { UseFetchOptions, UseFetch, Override } from "./types";
 
@@ -25,6 +25,7 @@ export const useAjax = <T>({
   onSuccess,
   onError,
   initial,
+  fetchImmediately = false,
   ...opts
 }: UseFetchOptions<T>): UseFetch<T> => {
   const config: UseFetchOptions<T> = opts;
@@ -61,6 +62,12 @@ export const useAjax = <T>({
     setLoading(true);
     axios.request<T>(updatedConfig).then(handleSuccess).catch(handleError);
   };
+
+  useEffect(() => {
+    if (fetchImmediately) {
+      handler();
+    }
+  }, []);
 
   return [
     handler,
