@@ -9,31 +9,41 @@ The hook is configured with an options object. This is an extension of the defau
 The hook returns a tuple comprising a function, and an object with some useful properties. The function makes the actual request, and takes an optional `override` argument. The argument can be an object, which is merged in with the initial config, or a function, which is passed the initial config as an argument. The return value of the override function is by default merged in with the initial config. If you do not wish either form to be merged with the initial config, pass `false` as the second argument to the function.
 
 ```jsx
+import { useAjax } from "react-use-ajax";
+
 const YourComponent = () => {
-  const [list, { calls, loading, data: things }] = useAjax({
-    url: "localhost:3000/api/something",
+  const [
+    fetch,
+    { data, loading, fetched, clearSuccess, success, successMessage },
+  ] = useAjax({
+    url: "localhost:9000",
     initial: [],
+    onSuccess: () => "Successfully fetched!",
+    fetchImmediately: true,
   });
 
-  const [doSomeUpdate, { loading: updateLoading, data: updated }] = useAjax({
-    url: "localhost:3000/api/something/1",
-    method: "PATCH",
-    data: [1, 2, 3],
+  const [probablyAnError, { error, clearError, errorMessage }] = useAjax({
+    url: "localhost:9000/error",
+    onError: (resp) => {
+      console.log(resp);
+    },
+    errorTimeout: 2000,
+    errorMessage: "something happened!",
   });
 
   return (
     <div>
-      <button onClick={() => list()}>Fetch!</button>
-      <button onClick={() => doSomeUpdate({ data: [3, 6, 9] })}>
-        Update something
-      </button>
-      <p>{things.join(", ")}</p>
-      <p>Last updated thing: {updated}</p>
-      {updateLoading && <p>Updating...</p>}
+      <button onClick={() => fetch()}>Fetch!</button>
+      <button onClick={() => probablyAnError()}>Error!</button>
+      {data.slice(0, 5).map((todo) => (todo as any).id)}
       {loading && <p>Loading...</p>}
-      <p>
-        Called {calls} {calls === 1 ? "time" : "times"}
-      </p>
+      {fetched && <p>Fetched</p>}
+      {success && <p>Success!</p>}
+      {error && <p>Error!</p>}
+      {successMessage && <p>{successMessage}</p>}
+      {errorMessage && <p>{errorMessage}</p>}
+      <button onClick={clearSuccess}>Clear success</button>
+      <button onClick={clearError}>Clear error</button>
     </div>
   );
 };
