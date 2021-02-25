@@ -66,6 +66,9 @@ export const useAjax = <T>({
       successCalls,
       loading,
       data: responseData,
+      clearSuccessCalls: () => setSuccessCalls(0),
+      clearErrorCalls: () => setErrorCalls(0),
+      clearCalls: () => setCalls(0),
     },
   ];
 };

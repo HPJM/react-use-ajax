@@ -22,6 +22,9 @@ interface UseFetchExtra<T> {
   errorCalls: number;
   loading: boolean;
   data: T;
+  clearSuccessCalls: () => void;
+  clearErrorCalls: () => void;
+  clearCalls: () => void;
 }
 
 export type UseFetch<T> = [UseFetchHandler<T>, UseFetchExtra<T>];
