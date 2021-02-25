@@ -1,11 +1,13 @@
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 
 export interface UseFetchOptions<T> extends AxiosRequestConfig {
-  onSuccess?: (data: AxiosResponse<T>) => void;
-  onError?: (data: AxiosResponse<T>) => void;
+  onSuccess?: (data: AxiosResponse<T>) => void | string;
+  onError?: (data: AxiosResponse<T>) => void | string;
   data?: T;
   initial?: T;
   fetchImmediately?: boolean;
+  successMessage?: string;
+  errorMessage?: string;
 }
 
 type OverrideFunc<T> = (
@@ -23,6 +25,10 @@ interface UseFetchExtra<T> {
   errorCalls: number;
   loading: boolean;
   fetched: boolean;
+  success: boolean;
+  error: boolean;
+  successMessage: string;
+  errorMessage: string;
   data: T;
   clearSuccessCalls: () => void;
   clearErrorCalls: () => void;

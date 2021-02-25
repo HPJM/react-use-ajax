@@ -35,19 +35,43 @@ export const useAjax = <T>({
   const [errorCalls, setErrorCalls] = useState<number>(0);
   const [fetched, setFetched] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [successMessage, setSuccessMessage] = useState<string>("");
   const [responseData, setResponseData] = useState<null | T>(initial || null);
 
   const handleSuccess = (resp: AxiosResponse<T>) => {
+    setSuccess(true);
+    if (error) {
+      setError(false);
+      setErrorMessage("");
+    }
     if (onSuccess) {
-      onSuccess(resp);
+      const successMessage = onSuccess(resp) || opts.successMessage;
+      if (successMessage && typeof successMessage === "string") {
+        setSuccessMessage(successMessage);
+      }
+    } else if (opts.successMessage) {
+      setSuccessMessage(opts.successMessage);
     }
     setResponseData(resp.data);
     setSuccessCalls(incCalls);
     setLoading(false);
   };
   const handleError = (resp: AxiosResponse<T>) => {
+    setError(true);
+    if (success) {
+      setSuccess(false);
+      setSuccessMessage("");
+    }
     if (onError) {
-      onError(resp);
+      const errorMessage = onError(resp) || opts.errorMessage;
+      if (errorMessage && typeof errorMessage === "string") {
+        setErrorMessage(errorMessage);
+      }
+    } else if (opts.errorMessage) {
+      setErrorMessage(opts.errorMessage);
     }
     setErrorCalls(incCalls);
     setLoading(false);
@@ -81,6 +105,10 @@ export const useAjax = <T>({
       clearSuccessCalls: () => setSuccessCalls(0),
       clearErrorCalls: () => setErrorCalls(0),
       clearCalls: () => setCalls(0),
+      error,
+      success,
+      errorMessage,
+      successMessage,
     },
   ];
 };

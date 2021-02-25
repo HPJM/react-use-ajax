@@ -39,6 +39,10 @@ const BasicFetch = (props: UseFetchOptions<string[]> = {}) => {
       clearCalls,
       clearErrorCalls,
       fetched,
+      success,
+      error,
+      successMessage,
+      errorMessage,
     },
   ] = useAjax({ url: URL, initial: [], ...props });
 
@@ -60,6 +64,10 @@ const BasicFetch = (props: UseFetchOptions<string[]> = {}) => {
       <button onClick={clearSuccessCalls}>Clear success calls</button>
       <button onClick={clearCalls}>Clear calls</button>
       {fetched && <p>Fetched</p>}
+      {success && <p>Success</p>}
+      {error && <p>Error</p>}
+      {successMessage && <p>{successMessage}</p>}
+      {errorMessage && <p>{errorMessage}</p>}
     </div>
   );
 };
@@ -179,5 +187,50 @@ describe("useAjax", () => {
     fireEvent.click(queryByText("Clear error calls"));
     expect(queryByTestId("calls").textContent).toBe("0");
     expect(queryByTestId("errorCalls").textContent).toBe("0");
+  });
+  test("shows success status after fetch from prop", async () => {
+    const { queryByText } = render(<BasicFetch successMessage="Success!" />);
+    fireEvent.click(queryByText("Fetch"));
+    await waitFor(() => {
+      expect(queryByText("Success")).toBeInTheDocument();
+      expect(queryByText("Success!")).toBeInTheDocument();
+    });
+  });
+  test("shows success status after fetch from function", async () => {
+    const { queryByText } = render(
+      <BasicFetch
+        onSuccess={() => "Success!"}
+        successMessage="shouldn't run!"
+      />
+    );
+    fireEvent.click(queryByText("Fetch"));
+    await waitFor(() => {
+      expect(queryByText("Success")).toBeInTheDocument();
+      expect(queryByText("Success!")).toBeInTheDocument();
+    });
+  });
+  test("shows error status after fetch from prop", async () => {
+    const { queryByText } = render(
+      <BasicFetch errorMessage="Error!" url={ERROR_URL} />
+    );
+    fireEvent.click(queryByText("Fetch"));
+    await waitFor(() => {
+      expect(queryByText("Error")).toBeInTheDocument();
+      expect(queryByText("Error!")).toBeInTheDocument();
+    });
+  });
+  test("shows error status after fetch from function", async () => {
+    const { queryByText } = render(
+      <BasicFetch
+        onError={() => "Error!"}
+        errorMessage="shouldn't run!"
+        url={ERROR_URL}
+      />
+    );
+    fireEvent.click(queryByText("Fetch"));
+    await waitFor(() => {
+      expect(queryByText("Error")).toBeInTheDocument();
+      expect(queryByText("Error!")).toBeInTheDocument();
+    });
   });
 });
