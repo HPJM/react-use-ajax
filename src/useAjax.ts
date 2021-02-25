@@ -4,6 +4,23 @@ import { UseFetchOptions, UseFetch, Override } from "./types";
 
 const incCalls = (calls: number) => calls + 1;
 
+const processOverride = <T>(
+  config: UseFetchOptions<T>,
+  override: Override<T>,
+  merge?: boolean
+) => {
+  if (typeof override === "function") {
+    const result = override(config);
+    return merge ? { ...result, ...config } : result;
+  }
+  return merge
+    ? {
+        ...config,
+        ...override,
+      }
+    : override;
+};
+
 export const useAjax = <T>({
   onSuccess,
   onError,
@@ -38,18 +55,7 @@ export const useAjax = <T>({
   };
 
   const handler = (override: Override<T> = {}, merge = true) => {
-    let updatedConfig = config;
-    if (typeof override === "function") {
-      const result = override(config);
-      updatedConfig = merge ? { ...result, ...config } : result;
-    } else {
-      updatedConfig = merge
-        ? {
-            ...config,
-            ...override,
-          }
-        : override;
-    }
+    const updatedConfig = processOverride(config, override, merge);
     if (!fetched) {
       setFetched(true);
     }
